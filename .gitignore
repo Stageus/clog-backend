@@ -142,3 +142,6 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# but keep the folder by keeping .gitkeep file
+.gitkeep
