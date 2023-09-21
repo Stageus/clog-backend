@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 
 app.get("/", async (req, res, next) => {
-    res.send("음")
+    res.send("qwer")
 });
 
 module.exports = app;
