@@ -7,15 +7,12 @@ const errorHandling = () => {
         const result = {
             message: err.message,
         }
+        // 개발환경 전용
         console.error(err);
-
-        if (err.status === 404) {
-            return res.sendFile(path.join(CLIENT_PATH, "404.html"));
-        }
 
         if (err instanceof multer.MulterError) {
             result.message = err.message;
-            return res.status(404).send(result);
+            return res.status(400).send(result);
         }
 
         return res.status(err.status).send(result);
