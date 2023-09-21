@@ -3,8 +3,10 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 
-app.get("/", async (req, res, next) => {
-    res.send("ㅎㅇ?")
-});
+const authApi = require("./routes/auth");
+
+app.use(express.json());
+
+app.use("/auth", authApi);
 
 module.exports = app;
