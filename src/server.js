@@ -4,7 +4,7 @@ const express = require("express");
 const app = express();
 
 app.get("/", async (req, res, next) => {
-    res.send("")
+    res.send("asdf")
 });
 
 module.exports = app;
