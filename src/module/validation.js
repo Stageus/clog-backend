@@ -1,4 +1,5 @@
 const { pwRegex, nameRegex, emailRegex } = require("../module/regex");
+const { BadRequestException } = require("../module/customError");
 const errorMessage = {
     invalidInput: "요청값이 잘못되었습니다",
     length: "길이가 비정상적입니다",
@@ -38,8 +39,7 @@ function Validation(input, name) {
     }
 
     this.setError = (message) => {
-        const error = new Error(`${name}: ${message}`);
-        error.status = 400;
+        const error = new BadRequestException(`${name}: ${message}`);
         throw error;
     }
 }
