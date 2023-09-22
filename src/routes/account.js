@@ -2,6 +2,7 @@ const pool = require("../../config/database/postgresql");
 const router = require("express").Router();
 const validate = require("../module/validation");
 const bcryptUtil = require("../module/bcryptUtil");
+const { BadRequestException, InternerServerException } = require("../module/customError");
 
 // personal color 만드는 헬퍼함수 module에 분리시켜서 회원가입 성공 시 params 마지막 인자에 넣어주면 감사하겠습ㄴ
 router.post("/", async (req, res, next) => {
@@ -18,6 +19,7 @@ router.post("/", async (req, res, next) => {
         validate(major, "major").checkInput().isNumber();
         validate(entryYear, "entryYear").checkInput().isNumber();
 
+        // 비밀번호 암호화
         const hashedPassword = await bcryptUtil.hashing(pw);
 
         const sql = `INSERT INTO 
@@ -33,7 +35,10 @@ router.post("/", async (req, res, next) => {
         res.send(result);
 
     } catch (error) {
-        console.error(error);
+        if (error.code === '23505' && error.constraint === 'unique_email') {
+            return next(new BadRequestException("중복된 이메일이 존재합니다"));
+        }
+        return next(new InternerServerException());
     }
 });
 
