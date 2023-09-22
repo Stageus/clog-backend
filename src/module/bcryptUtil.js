@@ -2,12 +2,12 @@ require("dotenv").config();
 
 const bcrypt = require("bcrypt");
 
-const hashing = (password) => {
+const hashing = async (password) => {
     try {
         const saltRound = process.env.HASHING_SALT_ROUND;
-        const salt = bcrypt.genSalt(saltRound);
+        const salt = await bcrypt.genSalt(parseInt(saltRound));
 
-        return bcrypt.hash(password, salt);
+        return await bcrypt.hash(password, salt);
     } catch (error) {
         console.log(error);
     }
