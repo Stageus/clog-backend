@@ -16,4 +16,7 @@ app.use(cookieParser());
 app.use("/auth", authApi);
 app.use("/account", accountApi);
 
+// error handling middleware
+app.use(errorHandling());
+
 module.exports = app;
