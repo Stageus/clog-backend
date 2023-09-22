@@ -3,7 +3,8 @@ const router = require("express").Router();
 const validate = require("../module/validation");
 const { maxEmailLength, maxPwLength } = require("../module/global");
 const bcryptUtil = require("../module/bcryptUtil");
-const jwtUtil = require("../module/jwtUtil")
+const jwtUtil = require("../module/jwtUtil");
+const { BadRequestException } = require('../module/customError');
 
 router.post("/login", async (req, res, next) => {
     const { email, pw } = req.body;
@@ -34,10 +35,9 @@ router.post("/login", async (req, res, next) => {
             }
         }
 
-        result.message = "아이디 또는 비밀번호가 올바르지 않습니다";
-        res.send(result);
+        throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다");
     } catch (error) {
-        console.error(error);
+        next(error);
     }
 });
 
