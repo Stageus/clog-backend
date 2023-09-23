@@ -34,8 +34,23 @@ router.post("/login", async (req, res, next) => {
                 return res.send(result);
             }
         }
-
         throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다");
+
+    } catch (error) {
+        next(error);
+    }
+});
+
+router.post("/logout", (req, res, next) => {
+    const result = {
+        message: "",
+        data: {}
+    }
+
+    try {
+        res.clearCookie("accessToken");
+        return res.send(result);
+
     } catch (error) {
         next(error);
     }
