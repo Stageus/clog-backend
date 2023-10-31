@@ -63,8 +63,8 @@ router.post("/", loginAuth, async (req, res, next) => {
         if (pgClient) {
             await pgClient.query("ROLLBACK");
         }
-        if (error.constraint === CONSTRAINT.UNIQUE_CLUB_NAME) {
-            next(new BadRequestException("이미 존재하는 동아리 이름입니다"))
+        if (error.constraint === CONSTRAINT.UNIQUE_CLUB_NAME_TO_CLUB_TB) {
+            next(new BadRequestException("이미 존재하는 동아리 이름입니다"));
         }
         if (error.constraint === CONSTRAINT.FK_BELONG_TO_CLUB_TB) {
             next(new BadRequestException("해당하는 소속이 존재하지 않습니다"));
