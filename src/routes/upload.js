@@ -11,7 +11,7 @@ router.post("/club-profile", loginAuth, imageUploader.clubProfileUploader(), asy
         data: {},
     }
 
-    result.data = image.location;
+    result.data = image?.location;
     res.send(result);
 });
 
@@ -23,7 +23,7 @@ router.post("/club-banner", loginAuth, imageUploader.clubBannerUploader(), async
         data: {},
     }
 
-    result.data = image.location;
+    result.data = image?.location;
     res.send(result);
 });
 
@@ -35,7 +35,7 @@ router.post("/post", loginAuth, imageUploader.postUploader(), async (req, res, n
         data: {},
     }
 
-    result.data = image.map(item => item.location);
+    result.data = image.map(item => item?.location);
     res.send(result);
 });
 
@@ -47,7 +47,7 @@ router.post("/promotion", loginAuth, imageUploader.promotionUploader(), async (r
         data: {},
     }
 
-    result.data = image.map(item => item.location);
+    result.data = image.map(item => item?.location);
     res.send(result);
 });
 
@@ -59,7 +59,7 @@ router.post("/notice", loginAuth, imageUploader.noticeUploader(), async (req, re
         data: {},
     }
 
-    result.data = image.map(item => item.location);
+    result.data = image.map(item => item?.location);
     res.send(result);
 });
 

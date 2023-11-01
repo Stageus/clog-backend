@@ -21,7 +21,6 @@ const clubProfileUpload = multer({
             if (!allowedExtensions.includes(extension)) {
                 return callback(new BadRequestException("파일 형식을 확인해주세요"));
             }
-            console.log(file);
             callback(null, `club/profile/${Date.now()}_${file.originalname}`);
         },
         acl: "public-read-write"
