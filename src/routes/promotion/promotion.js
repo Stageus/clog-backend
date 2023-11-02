@@ -2,12 +2,11 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
-const { PROMOTION, IMAGE, POSITION, SEARCH } = require("../../module/global");
-const { BadRequestException } = require("../../module/customError");
+const { PROMOTION, IMAGE, SEARCH } = require("../../module/global");
+const { BadRequestException, NotFoundException } = require("../../module/customError");
 const CONSTRAINT = require("../../module/constraint");
 
 // 홍보물 검색 api
-// 이 api search 라우터로 이동시켜줘야하나
 // filter: title OR club-name 택 1
 // 권한: 로그인한 사용자
 router.get("/list", loginAuth, async (req, res, next) => {
@@ -92,8 +91,6 @@ router.get("/list", loginAuth, async (req, res, next) => {
                                 $2
                                 `;
         selectClubParam.push(`%${search}%`);
-        console.log(selectClubSql);
-        console.log(selectClubParam);
 
         const selectClubData = await pool.query(selectClubSql, selectClubParam);
         result.data = {
@@ -156,7 +153,7 @@ router.get("/:promotionId", loginAuth, async (req, res, next) => {
         const selectPromotionParam = [promotionId, userId, promotionId];
         const selectPromotionData = await pool.query(selectPromotionSql, selectPromotionParam);
         if (selectPromotionData.rowCount === 0) {
-            throw new BadRequestException("해당하는 홍보물이 존재하지 않습니다");
+            throw new NotFoundException("해당하는 홍보물이 존재하지 않습니다");
         }
         result.data = {
             promotion: selectPromotionData.rows[0]

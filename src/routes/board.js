@@ -4,7 +4,7 @@ const loginAuth = require('../middleware/auth/loginAuth');
 const authCheck = require("../middleware/auth/authCheck");
 const validate = require('../module/validation');
 const { CLUB, BOARD, POSITION } = require("../module/global");
-const { BadRequestException } = require('../module/customError');
+const { BadRequestException, NotFoundException } = require('../module/customError');
 const CONSTRAINT = require("../module/constraint");
 
 // 게시판 리스트 조회 api
@@ -17,8 +17,19 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
 
     try {
         validate(clubId, "clubId").checkInput().isNumber();
-
-        const selectBoardListSql = `SELECT 
+        const selectClubSql = `SELECT
+                                    id
+                                FROM
+                                    club_tb
+                                WHERE
+                                    id = $1`;
+        const selectClubParam = [clubId];
+        const selectClubData = await pool.query(selectClubSql, selectClubParam);
+        if (selectClubData.rowCount === 0) {
+            throw new NotFoundException("해당하는 동아리가 없습니다");
+        }
+        const selectBoardListSql = `SELECT
+                                        -- 동아리가 없을때 잡아줘야좸 404로, 동아리는 있는데 게시판이 없는경우 400
                                         id,
                                         name
                                     FROM
@@ -27,9 +38,6 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
                                         club_id = $1`;
         const selectBoardListParam = [clubId];
         const selectBoardListData = await pool.query(selectBoardListSql, selectBoardListParam);
-        if (selectBoardListData.rowCount === 0) {
-            throw new BadRequestException('해당 동아리에 게시판이 존재하지 않습니다');
-        }
         result.data = {
             boards: selectBoardListData.rows
         }
@@ -56,15 +64,19 @@ router.post("/", loginAuth, authCheck(POSITION.MANAGER), async (req, res, next) 
         const createBoardSql = `INSERT INTO
                                             club_board_tb (club_id, name)
                                 SELECT
-                                            $1, $2
-                                WHERE 
-                                            (SELECT 
-                                                    COUNT(*) 
-                                             FROM
-                                                    club_board_tb 
-                                             WHERE 
-                                                    club_id = $3) < $4
-                                RETURNING id`;
+                                        $1,
+                                        $2
+                                WHERE
+                                    (
+                                        SELECT
+                                            COUNT(*)
+                                        FROM
+                                            club_board_tb
+                                        WHERE
+                                            club_id = $3
+                                    ) < $4
+                                RETURNING
+                                        id`;
         const createBoardParam = [clubId, name, clubId, CLUB.MAX_BOARD_COUNT];
         const createBoardData = await pool.query(createBoardSql, createBoardParam);
         if (createBoardData.rowCount === 0) {

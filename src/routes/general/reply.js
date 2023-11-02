@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const pool = require('../../../config/database/postgresql');
 const loginAuth = require('../../middleware/auth/loginAuth');
-const { BadRequestException } = require('../../module/customError');
+const { BadRequestException, NotFoundException } = require('../../module/customError');
 const { REPLY, POSITION } = require('../../module/global');
 const CONSTRAINT = require("../../module/constraint");
 const validate = require('../../module/validation');
@@ -52,7 +52,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
         const selectClubAuthParam = [userId, commentId];
         const selectClubAuthResult = await pool.query(selectClubAuthSql, selectClubAuthParam);
         if (selectClubAuthResult.rowCount === 0) {
-            throw new BadRequestException("댓글이 존재하지 않습니다");
+            throw new NotFoundException("댓글이 존재하지 않습니다");
         }
         if (selectClubAuthResult.rows[0].position === null) {
             throw new BadRequestException("해당 동아리에 가입되어있지 않습니다");

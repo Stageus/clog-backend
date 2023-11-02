@@ -655,7 +655,7 @@ router.put("/position", loginAuth, async (req, res, next) => {
         }
         const { clubId } = selectAuthData.rows[0];
         // 2. 만약 회장을 넘겨주는 경우 본인의 직급을 운영진으로 변경시켜줌
-        if (position === POSITION.PRESIDENT) {
+        if (position == POSITION.PRESIDENT) {
             const downPositionSql = `UPDATE
                                             club_member_tb
                                         SET

@@ -8,7 +8,7 @@ const nameRegex = /^[가-힣a-zA-Z ]{2,16}$/;
 const emailRegex = /^[A-Za-z0-9]{1,64}@inha\.edu$/;
 
 // club
-const clubNameRegex = /^[가-힣a-zA-Z ]{1,20}$/
+const clubNameRegex = /^[가-힣a-zA-Z ]{1,12}$/
 const themeColorRegex = /^[a-zA-Z0-9]{6}$/;
 
 // notification

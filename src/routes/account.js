@@ -5,7 +5,7 @@ const validate = require("../module/validation");
 const bcryptUtil = require("../module/bcrypt");
 const personalColor = require("../module/personalColor");
 const CONSTRAINT = require("../module/constraint");
-const { BadRequestException } = require("../module/customError");
+const { BadRequestException, NotFoundException } = require("../module/customError");
 
 // 회원가입
 router.post("/", async (req, res, next) => {
@@ -73,7 +73,7 @@ router.get("/", loginAuth, async (req, res, next) => {
         const selectProfileParam = [userId];
         const selectProfileData = await pool.query(selectProfileSql, selectProfileParam);
         if (selectProfileData.rowCount === 0) {
-            throw new BadRequestException("해당하는 사용자자 없습니다");
+            throw new NotFoundException("해당하는 사용자가 없습니다");
         }
         result.data = selectProfileData.rows[0]
     } catch (error) {
