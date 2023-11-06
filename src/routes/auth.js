@@ -34,7 +34,7 @@ router.post("/login", async (req, res, next) => {
             throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        const accessToken = await jwtUtil.userSign(userData);
+        const accessToken = jwtUtil.userSign(userData);
         res.cookie("accessToken", accessToken, {
             httpOnly: false,
             secure: false,
