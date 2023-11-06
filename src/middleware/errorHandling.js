@@ -10,8 +10,8 @@ const errorHandling = () => {
 
         // 500 error
         if (!err.status) {
-            const serverError = new InternerServerException("서버에서 오류가 발생하였습니다");
-            return res.status(serverError.status).send(serverError.message);
+            const serverError = new InternerServerException();
+            return res.status(serverError.status).send({message: serverError.message});
         }
 
         return res.status(err.status).send(result);
