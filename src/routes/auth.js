@@ -7,6 +7,8 @@ const jwtUtil = require("../module/jwt");
 const { BadRequestException } = require('../module/customError');
 const { AUTH, ACCOUNT } = require("../module/global");
 const emailHandler = require("../module/emailHandler");
+require("dotenv").config();
+const bcrypt = require("bcrypt");
 
 // 로그인 api
 router.post("/login", async (req, res, next) => {
@@ -20,23 +22,22 @@ router.post("/login", async (req, res, next) => {
         validate(email, "email").checkInput().checkLength(1, ACCOUNT.MAX_EMAIL_LENGTH);
         validate(pw, "pw").checkInput().checkLength(1, ACCOUNT.MAX_PW_LENGTH);
 
-        const sql = "SELECT id, pw FROM account_TB WHERE email = $1";
-        const params = [email];
-        const data = await pool.query(sql, params);
-        if (data.rowCount === 0) {
+        const selectUserSql = "SELECT id, pw FROM account_TB WHERE email = $1";
+        const selectUserParams = [email];
+        const selectUserData = await pool.query(selectUserSql, selectUserParams);
+        if (selectUserData.rowCount === 0) {
             throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다");
         }
 
-        const userData = data.rows[0];
+        const userData = selectUserData.rows[0];
         // 입력받은 pw와 암호화된 pw가 일치할경우 accessToken 발급
-        const passwordMatch = bcryptUtil.compare(pw, userData.pw);
+        const passwordMatch = await bcryptUtil.compare(pw, userData.pw);
         if (!passwordMatch) {
-            throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다.");
+            throw new BadRequestException("아이디 또는 비밀번호가 올바르지 않습니다");
         }
-
         const accessToken = jwtUtil.userSign(userData);
         res.cookie("accessToken", accessToken, {
-            httpOnly: false,
+            httpOnly: true,
             secure: false,
         });
         result.data = {
