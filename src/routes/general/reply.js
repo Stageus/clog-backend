@@ -265,12 +265,6 @@ router.put("/", loginAuth, async (req, res, next) => {
         if (selectAuthData.rowCount === 0) {
             throw new BadRequestException("해당하는 댓글이 존재하지 않습니다");
         }
-        // if (selectAuthData.rows[0].position === null) {
-        //     throw new BadRequestException("동아리에 가입하지 않은 사용자입니다");
-        // }
-        // if (selectAuthData.rows[0].accountId !== userId && selectAuthData.rows[0].position >= POSITION.MANAGER) {
-        //     throw new BadRequestException("수정 권한이 존재하지 않습니다");
-        // }
         if (!selectAuthData.rows[0].manageAuth) {
             throw new BadRequestException("수정 권한이 존재하지 않습니다");
         }
@@ -340,12 +334,6 @@ router.delete("/", loginAuth, async (req, res, next) => {
         if (selectAuthData.rowCount === 0) {
             throw new BadRequestException("해당하는 댓글이 존재하지 않습니다");
         }
-        // if (selectAuthData.rows[0].position === null) {
-        //     throw new BadRequestException("동아리에 가입하지 않은 사용자입니다");
-        // }
-        // if (selectAuthData.rows[0].accountId !== userId && selectAuthData.rows[0].position >= POSITION.MANAGER) {
-        //     throw new BadRequestException("삭제 권한이 존재하지 않습니다");
-        // }
         if (!selectAuthData.rows[0].manageAuth) {
             throw new BadRequestException("삭제 권한이 존재하지 않습니다");
         }

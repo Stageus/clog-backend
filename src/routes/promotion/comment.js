@@ -194,9 +194,7 @@ router.put("/", loginAuth, async (req, res, next) => {
         if (selectAuthData.rowCount === 0) {
             throw new BadRequestException("해당하는 댓글이 존재하지 않습니다");
         }
-        // if (selectAuthData.rows[0].position === null || selectAuthData.rows[0].position > POSITION.MEMBER) {
-        //     throw new BadRequestException("수정 권한이 없습니다")
-        // }
+        
         if (!selectAuthData.rows[0].manageState) {
             throw new BadRequestException("수정 권한이 없습니다");
         }

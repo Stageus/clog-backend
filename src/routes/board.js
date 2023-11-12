@@ -82,7 +82,9 @@ router.post("/", loginAuth, authCheck(POSITION.MANAGER), async (req, res, next) 
         if (createBoardData.rowCount === 0) {
             throw new BadRequestException(`게시판의 최대 수는 ${CLUB.MAX_BOARD_COUNT}개입니다`);
         }
-        result.data = createBoardData.rows[0].id;
+        result.data = {
+            "boardId": createBoardData.rows[0].id
+        };
     } catch (error) {
         if (error.constraint === CONSTRAINT.FK_CLUB_TO_BOARD_TB) {
             return next(new BadRequestException("동아리가 존재하지 않습니다"));

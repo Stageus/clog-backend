@@ -4,7 +4,7 @@ const pool = require("../../config/database/postgresql");
 const validate = require('../module/validation');
 const loginAuth = require("../middleware/auth/loginAuth");
 const CONSTRAINT = require("../module/constraint");
-const { BadRequestException } = require('../module/customError');
+const { BadRequestException, ForbbidenException } = require('../module/customError');
 const { CLUB, POSITION } = require("../module/global");
 const authCheck = require("../middleware/auth/authCheck");
 
@@ -104,42 +104,45 @@ router.get("/:clubId/profile", loginAuth, async (req, res, next) => {
                                     club_tb.banner_img AS "bannerImage",
                                     club_tb.cover AS "cover", 
                                     club_tb.theme_color AS "themeColor",
-                                    COUNT(club_member_tb.*)::int AS "memberCount",
-                                    TO_CHAR(club_tb.created_at, 'YYYY.MM.DD') AS "createdAt",
-                                    CASE
-                                        WHEN 
-                                            club_member_tb.position = 0 
-                                        THEN 
-                                            true
-                                        ELSE 
-                                            false
-                                    END AS "manageState"
+                                    (
+                                        SELECT
+                                            COUNT(*)
+                                        FROM
+                                            club_member_tb
+                                        WHERE
+                                            club_member_tb.club_id = club_tb.id
+                                    )::int AS "memberCount",
+                                    COALESCE((
+                                                SELECT
+                                                    club_member_tb.id
+                                                FROM
+                                                    club_member_tb
+                                                WHERE
+                                                    club_member_tb.account_id = $1
+                                                AND
+                                                    club_member_tb.club_id = club_tb.id
+                                    )::boolean, false) AS "isMember",
+                                    COALESCE
+                                    (
+                                        club_member_tb.position = 0, false
+                                    )   AS "manageState",
+                                    club_tb.is_recruit AS "isRecruit",
+                                    TO_CHAR(club_tb.created_at, 'YYYY.MM.DD') AS "createdAt"
                                 FROM 
                                     club_tb
                                 LEFT JOIN
                                     club_member_tb
                                 ON
-                                    club_member_tb.club_id = $1 AND club_member_tb.account_id = $2
+                                    club_member_tb.club_id = $2 AND club_member_tb.account_id = $1
                                 JOIN 
                                     belong_tb ON club_tb.belong = belong_tb.id
                                 JOIN   
                                     big_category_tb ON club_tb.big_category = big_category_tb.id
-                                JOIN   
+                                JOIN 
                                     small_category_tb ON club_tb.small_category = small_category_tb.id
                                 WHERE 
-                                    club_tb.id = $3
-                                GROUP BY 
-                                    club_tb.name, 
-                                    belong_tb.name, 
-                                    big_category_tb.name, 
-                                    small_category_tb.name, 
-                                    club_tb.profile_img, 
-                                    club_tb.banner_img, 
-                                    club_tb.cover, 
-                                    club_tb.theme_color, 
-                                    club_tb.created_at,
-                                    club_member_tb.position`;
-        const selectedClubParams = [clubId, userId, clubId];
+                                    club_tb.id = $2`;
+        const selectedClubParams = [userId, clubId];
 
         const clubProfiledata = await pool.query(selectedClubSql, selectedClubParams);
         if (clubProfiledata.rowCount === 0) {
@@ -311,17 +314,17 @@ router.get("/join-request/:clubId/list", loginAuth, async (req, res, next) => {
         validate(clubId, "club-id").checkInput().isNumber();
         // 권한 체크
         const selectAuthSql = `SELECT
-                                    club_member_tb.position
+                                    club_member_tb.position < 2 AS "manageAuth"
                                 FROM
                                     club_member_tb
                                 WHERE
-                                    club_member_tb.club_id = $1
+                                    club_member_tb.account_id = $1
                                 AND
-                                    club_member_tb.account_id = $2`;
-        const selectAuthParam = [clubId, userId];
+                                    club_member_tb.club_id = $2`;
+        const selectAuthParam = [userId, clubId];
         const selectAuthData = await pool.query(selectAuthSql, selectAuthParam);
-        if (selectAuthData.rowCount === 0 || selectAuthData.rows[0]?.position > POSITION.MANAGER) {
-            throw new BadRequestException("권한이 없습니다");
+        if (selectAuthData.rowCount === 0 || !selectAuthData.rows[0].manageAuth) {
+            throw new ForbbidenException("권한이 없습니다");
         }
 
         const selectJoinRequestSql = `SELECT 
@@ -342,18 +345,13 @@ router.get("/join-request/:clubId/list", loginAuth, async (req, res, next) => {
                                             club_id = $1`;
         const selectJoinRequestParam = [clubId];
         const selectJoinRequestData = await pool.query(selectJoinRequestSql, selectJoinRequestParam);
-        if (selectJoinRequestData.rowCount !== 0) {
-            result.data = {
-                users: selectJoinRequestData.rows
-            }
-            return res.send(result);
-        }
-        result.message = "해당 동아리에 가입 요청 리스트가 비어있습니다";
-        res.send(result);
-
+        result.data = {
+            users: selectJoinRequestData.rows
+        };
     } catch (error) {
         return next(error);
     }
+    res.send(result);
 });
 
 // 동아리 가입 신청 승인 api
@@ -403,7 +401,7 @@ router.post("/member", loginAuth, async (req, res, next) => {
             throw new BadRequestException("권한이 없습니다");
         }
 
-        // 이미 가입 신청한 유저인지 확인
+        // 가입 신청한 유저인지 확인
         const selectJoinRequestMemberSql = `SELECT 
                                                     account_id AS "accountId", 
                                                     club_id AS "clubId" 
@@ -626,6 +624,9 @@ router.put("/position", loginAuth, async (req, res, next) => {
         pgClient = await pool.connect();
         // 트랜잭션 시작
         await pgClient.query("BEGIN");
+
+        // 0. 본인의 권한을 변경하는건 불가
+
         // 1. 권한 체크 (해당 동아리의 회장인지?)
         const selectAuthSql = `SELECT
                                     club_member_tb.position = 0 AS "position",

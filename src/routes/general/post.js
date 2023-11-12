@@ -4,7 +4,7 @@ const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
 const CONSTRAINT = require("../../module/constraint");
 const { CLUB, POST, POSITION } = require('../../module/global');
-const { BadRequestException, NotFoundException } = require('../../module/customError');
+const { BadRequestException, NotFoundException, ForbbidenException } = require('../../module/customError');
 
 // 동아리 내 모든 일반 게시물을 가져오는 api
 // 권한: 해당 동아리에 가입되어있어야 함
@@ -25,7 +25,7 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
         const selectAuthSql = `SELECT
                                     (
                                         SELECT
-                                            club_member_tb.position
+                                            club_member_tb.position < 3
                                         FROM
                                             club_member_tb
                                         WHERE
@@ -40,9 +40,9 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
         const selectAuthParam = [userId, clubId];
         const selectAuthData = await pool.query(selectAuthSql, selectAuthParam);
         if (selectAuthData.rowCount === 0) {
-            throw new BadRequestException("존재하지 않는 동아리입니다");
+            throw new NotFoundException("존재하지 않는 동아리입니다");
         }
-        if (selectAuthData.rows[0].position === null) {
+        if (!selectAuthData.rows[0].position) {
             throw new BadRequestException("동아리에 가입하지 않은 사용자입니다");
         }
         const offset = (page - 1) * POST.MAX_POST_COUNT_PER_PAGE;
@@ -62,32 +62,35 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
                                             club_tb.id = $1`;
         const selectAllPostCountParam = [clubId];
         const selectAllPostSql = `SELECT
-                                            club_post_tb.id AS "postId",
-                                            account_tb.name AS "authorName",
-                                            club_post_tb.title AS "title",
-                                            (
-                                                SELECT
-                                                    COUNT(*)
-                                                FROM
-                                                    club_comment_tb
-                                                WHERE
-                                                    club_comment_tb.club_post_id = club_post_tb.id
-                                            )::int AS "commentCount",
-                                            -- COUNT(club_comment_tb.id) AS "commentCount",
-                                            club_post_tb.created_at AS "createdAt"
-                                  FROM
-                                            club_post_tb
-                                  JOIN
-                                            account_tb ON club_post_tb.account_id = account_tb.id
-                                  JOIN 
-                                            club_board_tb ON club_post_tb.club_board_id = club_board_tb.id 
-                                  WHERE 
-                                            club_board_tb.club_id = $1
-                                  ORDER BY
-                                            club_post_tb.created_at DESC
-                                  OFFSET
+                                        club_post_tb.id AS "postId",
+                                        account_tb.name AS "authorName",
+                                        club_post_tb.title AS "title",
+                                        (
+                                            SELECT
+                                                COUNT(*)
+                                            FROM
+                                                club_comment_tb
+                                            WHERE
+                                                club_comment_tb.club_post_id = club_post_tb.id
+                                        )::int AS "commentCount",
+                                        club_post_tb.created_at AS "createdAt"
+                                    FROM
+                                        club_post_tb
+                                    JOIN
+                                        account_tb
+                                    ON
+                                        club_post_tb.account_id = account_tb.id
+                                    JOIN
+                                        club_board_tb
+                                    ON
+                                        club_post_tb.club_board_id = club_board_tb.id
+                                    WHERE
+                                        club_board_tb.club_id = $1
+                                    ORDER BY
+                                        club_post_tb.created_at
+                                    DESC OFFSET
                                             $2
-                                  LIMIT
+                                        LIMIT
                                             $3`;
         const selectAllPostParam = [clubId, offset, CLUB.MAX_ALL_POST_COUNT_PER_PAGE];
         const selectAllPostCountData = await pool.query(selectAllPostCountSql, selectAllPostCountParam);
@@ -122,7 +125,7 @@ router.get("/list/board/:boardId", loginAuth, async (req, res, next) => {
         const selectAuthSql = `SELECT
                                     (
                                         SELECT
-                                            club_member_tb.position
+                                            club_member_tb.position < 3
                                         FROM
                                             club_member_tb
                                         WHERE
@@ -143,8 +146,8 @@ router.get("/list/board/:boardId", loginAuth, async (req, res, next) => {
         if (selectAuthData.rowCount === 0) {
             return next(new NotFoundException("존재하지 않는 게시판입니다"));
         }
-        if (selectAuthData.rows[0].position === null) {
-            return next(new BadRequestException("동아리에 가입하지 않은 사용자입니다"));
+        if (!selectAuthData.rows[0].position) {
+            return next(new ForbbidenException("동아리에 가입하지 않은 사용자입니다"));
         }
 
         const selectPostOfBoardSql = `SELECT 
@@ -193,7 +196,7 @@ router.get("/:postId", loginAuth, async (req, res, next) => {
         const selectAuthSql = `SELECT
                                     (
                                         SELECT
-                                            club_member_tb.position
+                                            club_member_tb.position < 3
                                         FROM
                                             club_member_tb
                                         WHERE
@@ -218,8 +221,8 @@ router.get("/:postId", loginAuth, async (req, res, next) => {
         if (selectAuthData.rowCount === 0) {
             return next(new NotFoundException("존재하지 않는 게시글입니다"));
         }
-        if (selectAuthData.rows[0].position === null) {
-            return next(new BadRequestException("동아리에 가입하지 않은 사용자입니다"));
+        if (!selectAuthData.rows[0].position) {
+            return next(new ForbbidenException("동아리에 가입하지 않은 사용자입니다"));
         }
 
         // 본인이거나 해당 동아리의 관리자일 경우 manageState: true
