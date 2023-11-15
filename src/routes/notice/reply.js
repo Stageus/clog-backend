@@ -2,7 +2,7 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
-const { REPLY } = require("../../module/global");
+const { REPLY, MAX_PK_LENGTH } = require("../../module/global");
 const { BadRequestException } = require('../../module/customError');
 const CONSTRAINT = require("../../module/constraint");
 
@@ -18,7 +18,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "comment-id").checkInput().isNumber();
+        validate(commentId, "comment-id").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         const offset = (page - 1) * REPLY.MAX_REPLY_COUNT_PER_COMMENT;
 
         const selectReplySql = `SELECT
@@ -94,7 +94,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         const selectAuthSql = `SELECT
@@ -165,7 +165,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         // 권한 체크
@@ -235,7 +235,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         // 권한 체크
         const selectAuthSql = `SELECT

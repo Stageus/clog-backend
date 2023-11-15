@@ -2,8 +2,8 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
-const { PROMOTION, IMAGE, SEARCH } = require("../../module/global");
-const { BadRequestException, NotFoundException } = require("../../module/customError");
+const { PROMOTION, IMAGE, SEARCH, MAX_PK_LENGTH } = require("../../module/global");
+const { BadRequestException, NotFoundException, ForbbidenException } = require("../../module/customError");
 const CONSTRAINT = require("../../module/constraint");
 
 // 홍보물 검색 api
@@ -113,7 +113,7 @@ router.get("/:promotionId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(promotionId, "promotion-id").checkInput().isNumber();
+        validate(promotionId, "promotion-id").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         const selectPromotionSql = `SELECT 
                                         club_tb.name AS "clubName", 
@@ -177,10 +177,10 @@ router.post("/", loginAuth, async (req, res, next) => {
     let pgClient = null;
 
     try {
-        validate(clubId, "clubId").checkInput().isNumber();
+        validate(clubId, "clubId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(title, "title").checkInput().checkLength(1, PROMOTION.MAX_PROMOTION_TITLE_LENGTH);
         validate(content, "content").checkInput().checkLength(1, PROMOTION.MAX_PROMOTION_CONTENT_LENGTH);
-        validate(images, "images").checkInput().checkLength(1, IMAGE.MAX_PROMOTION_COUNT);
+        validate(images, "images").checkInput().checkLength(0, IMAGE.MAX_PROMOTION_COUNT);
 
         // 권한 체크
         const selectAuthSql = `SELECT
@@ -202,7 +202,7 @@ router.post("/", loginAuth, async (req, res, next) => {
             throw new BadRequestException("동아리에 가입하지 않은 사용자입니다");
         }
         if (!selectAuthData.rows[0].manageAuth) {
-            throw new BadRequestException("홍보글 작성 권한이 없습니다");
+            throw new ForbbidenException("홍보글 작성 권한이 없습니다");
         }
 
         // 트랜잭션 시작
@@ -257,7 +257,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     let pgClient = null;
 
     try {
-        validate(promotionId, "promotionId").checkInput().isNumber();
+        validate(promotionId, "promotionId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(title, "title").checkInput().checkLength(1, PROMOTION.MAX_PROMOTION_TITLE_LENGTH);
         validate(content, "content").checkInput().checkLength(1, PROMOTION.MAX_PROMOTION_CONTENT_LENGTH);
         validate(images, "images").checkInput().checkLength(1, IMAGE.MAX_PROMOTION_COUNT);
@@ -344,7 +344,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(promotionId, "promotionId").checkInput().isNumber();
+        validate(promotionId, "promotionId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         // 권한 체크
         const selectAuthSql = `SELECT

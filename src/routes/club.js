@@ -1,12 +1,10 @@
-
 const router = require("express").Router();
 const pool = require("../../config/database/postgresql");
 const validate = require('../module/validation');
 const loginAuth = require("../middleware/auth/loginAuth");
 const CONSTRAINT = require("../module/constraint");
-const { BadRequestException, ForbbidenException } = require('../module/customError');
-const { CLUB, POSITION } = require("../module/global");
-const authCheck = require("../middleware/auth/authCheck");
+const { BadRequestException, ForbbidenException, NotFoundException } = require('../module/customError');
+const { CLUB, POSITION, MAX_PK_LENGTH } = require("../module/global");
 
 // 동아리 생성 api
 router.post("/", loginAuth, async (req, res, next) => {
@@ -158,31 +156,43 @@ router.get("/:clubId/profile", loginAuth, async (req, res, next) => {
     }
 });
 
-// 동아리 관리자 페이지 (동아리 프로필)api
-// 논의 필요
-router.get("/:clubId/manage", loginAuth, authCheck(POSITION.MANAGER), async (req, res, next) => {
-});
-
 // 동아리 수정 api
 // 해당 동아리의 관리자만
-router.put("/", loginAuth, authCheck(POSITION.MANAGER), async (req, res, next) => {
+router.put("/", loginAuth, async (req, res, next) => {
     const {
-        name, cover, isAllowJoin, themeColor, bannerImg, profileImg
+        clubId, name, cover, isAllowJoin, themeColor, bannerImg, profileImg
     } = req.body;
-    const { clubId } = req.body;
+    const userId = req.decoded.id;
     const result = {
         message: "",
         data: {}
     };
 
     try {
+        validate(clubId, "club-id").checkInput().isNumber().checkLength(1, MAX_PK_LENGTH);
         validate(name, "name").checkInput().checkClubNameRegex();
         validate(cover, "cover").checkInput().checkLength(1, CLUB.MAX_CLUB_COVER_LENGTH);
-        validate(isAllowJoin, "isAllowJoin").checkInput();
+        validate(isAllowJoin, "isAllowJoin").checkInput().isBoolean();
         validate(themeColor, "themeColor").checkInput().checkThemeColorRegex();
         validate(bannerImg, "bannerImg").checkInput().checkLength(1, CLUB.MAX_BANNER_IMAGE_LENGTH);
         validate(profileImg, "profileImg").checkInput().checkLength(1, CLUB.MAX_PROFILE_IMAGE_LENGTH);
 
+        const checkClubAuthSql = `SELECT
+                                        position < 3  AS "manageAuth"
+                                    FROM
+                                        club_member_tb
+                                    WHERE
+                                        account_id = $1
+                                    AND
+                                        club_id = $2`;
+        const checkClubAuthParam = [userId, clubId];
+        const checkClubAuthData = await pool.query(checkClubAuthSql, checkClubAuthParam);
+        if (checkClubAuthData.rowCount === 0) {
+            throw new NotFoundException("해당하는 동아리가 존재하지 않습니다");
+        }
+        if (!checkClubAuthData.rows[0].manageAuth) {
+            throw new ForbbidenException("관리자 권한이 필요합니다");
+        }
         const modifyClubProfileSql = `UPDATE 
                                             club_tb
                                         SET 
@@ -195,8 +205,7 @@ router.put("/", loginAuth, authCheck(POSITION.MANAGER), async (req, res, next) =
                                         WHERE 
                                             id = $7`;
         const modifyClubProfileParam = [
-            name, cover, isAllowJoin, themeColor, bannerImg, profileImg,
-            clubId
+            name, cover, isAllowJoin, themeColor, bannerImg, profileImg, clubId
         ];
         const modifyClubProfileData = await pool.query(modifyClubProfileSql, modifyClubProfileParam);
         if (modifyClubProfileData.rowCount !== 0) {

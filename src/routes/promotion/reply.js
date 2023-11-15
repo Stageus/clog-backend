@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const loginAuth = require('../../middleware/auth/loginAuth');
-const { REPLY } = require('../../module/global');
+const { REPLY, MAX_PK_LENGTH } = require('../../module/global');
 const validate = require('../../module/validation');
 const pool = require("../../../config/database/postgresql");
 const CONSTRAINT = require("../../module/constraint");
@@ -20,7 +20,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, "page").isNumber().isPositive();
 
         // manageState 권한은 답글의 작성자이거나 해당 동아리의 관리자여야함
@@ -100,7 +100,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         // 답글 작성
@@ -138,7 +138,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         const selectAuthSql = `SELECT
@@ -195,15 +195,18 @@ router.put("/", loginAuth, async (req, res, next) => {
     res.send(result);
 });
 
-
 // 홍보 게시물 답글 삭제
 // 권한: 해당 동아리 관리자 or 답글 작성자
 router.delete("/", loginAuth, async (req, res, next) => {
     const userId = req.decoded.id;
     const { replyId } = req.body;
+    const result = {
+        message: "",
+        data: {}
+    };
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         const selectAuthSql = `SELECT
                                     COALESCE(
@@ -240,7 +243,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
             throw new BadRequestException("해당하는 댓글이 존재하지 않습니다");
         }
         if (!selectAuthData.rows[0].manageState) {
-            throw new BadRequestException("댓글 수정 권한이 없습니다");
+            throw new BadRequestException("댓글 삭제 권한이 없습니다");
         }
         // 삭제 시작
         const deleteReplySql = `DELETE FROM
@@ -255,5 +258,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
+    res.send(result);
 });
+
 module.exports = router;

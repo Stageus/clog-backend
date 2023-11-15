@@ -4,6 +4,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
 const redisClient = require("../config/database/redis");
+const cors = require("cors");
 
 // 로그
 const morgan = require("morgan");
@@ -30,6 +31,10 @@ redisClient.connect();
 app.use(morgan(morganFormat, { stream: logger.stream })); // morgan 로그 설정 
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
 // api call middleware
 app.use("/account", accountApi);
@@ -43,7 +48,7 @@ app.use("/general", generalApi);
 app.use("/notice", noticeApi);
 app.use("/promotion", promotionApi);
 
-// error handling muddleware
+// error handling middleware
 app.use(errorHandling());
 
 module.exports = app;

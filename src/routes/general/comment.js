@@ -2,7 +2,7 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
-const { COMMENT } = require('../../module/global');
+const { COMMENT, MAX_PK_LENGTH } = require('../../module/global');
 const CONSTRAINT = require("../../module/constraint");
 const { BadRequestException, NotFoundException, ForbbidenException } = require('../../module/customError');
 
@@ -18,7 +18,7 @@ router.get("/list/post/:postId", loginAuth, async (req, res, next) => {
     }
 
     try {
-        validate(postId, "post-id").checkInput().isNumber();
+        validate(postId, "post-id").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, "page").isNumber().isPositive();
         const selectClubAuthSql = `SELECT
                                         (
@@ -151,19 +151,19 @@ router.post("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(postId, "postId").checkInput().isNumber();
+        validate(postId, "postId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, COMMENT.MAX_COMMENT_CONTENT_LENGTH);
         const selectClubAuthSql = `SELECT 
                                         (
                                             SELECT 
-                                                club_member_tb.account_id < 3
+                                                club_member_tb.position < 3
                                             FROM 
                                                 club_member_tb
                                             WHERE 
                                                 club_member_tb.club_id = club_tb.id
                                             AND 
                                                 club_member_tb.account_id = $1 
-                                        ) AS "position",
+                                        ) AS "position"
                                     FROM 
                                         club_post_tb 
                                     JOIN 
@@ -219,7 +219,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, COMMENT.MAX_COMMENT_CONTENT_LENGTH);
 
         const selectAuthSql = `SELECT
@@ -286,7 +286,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkLength(1, MAX_PK_LENGTH).isNumber();
 
         const selectAuthSql = `SELECT
                                     club_comment_tb.account_id AS "accountId",

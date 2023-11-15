@@ -56,7 +56,7 @@ function Validation(input, name) {
     }
 
     this.isBoolean = () => {
-        if (input !== 'true' && input !== 'false') this.setError(errorMessage.isBoolean);
+        if (typeof input !== "boolean") this.setError(errorMessage.isBoolean);
         return this;
     }
 

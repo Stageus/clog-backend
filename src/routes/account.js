@@ -135,11 +135,10 @@ router.delete("/", loginAuth, async (req, res, next) => {
                                         id = $1`;
         const deleteUserParam = [userId];
         const deleteUserData = await pool.query(deleteUserSql, deleteUserParam);
+        console.log(deleteUserData)
         if (deleteUserData.rowCount === 0) {
             throw new BadRequestException("해당하는 사용자가 존재하지 않습니다");
         }
-        redisClient.set(email, authCode.toString());
-        redisClient.expire(email, auth.CERTIFIED_EXPIRE_TIME);
     } catch (error) {
         return next(error);
     }

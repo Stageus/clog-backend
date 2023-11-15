@@ -2,7 +2,7 @@ const router = require("express").Router();
 const pool = require('../../../config/database/postgresql');
 const loginAuth = require('../../middleware/auth/loginAuth');
 const { BadRequestException, NotFoundException } = require('../../module/customError');
-const { REPLY, POSITION } = require('../../module/global');
+const { REPLY, MAX_PK_LENGTH } = require('../../module/global');
 const CONSTRAINT = require("../../module/constraint");
 const validate = require('../../module/validation');
 
@@ -18,7 +18,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, "page").isNumber().isPositive();
         const offset = (page - 1) * REPLY.MAX_REPLY_COUNT_PER_COMMENT;
         const selectClubAuthSql = `SELECT
@@ -147,7 +147,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         // 권한 체크 (동아리에 가입되어있는 사용자인지)
@@ -222,7 +222,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, REPLY.MAX_REPLY_CONTENT_LENGTH);
 
         // 권한 체크
@@ -292,7 +292,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     const { replyId } = req.body;
 
     try {
-        validate(replyId, "replyId").checkInput().isNumber();
+        validate(replyId, "replyId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         // 권한 체크
         const selectAuthSql = `SELECT

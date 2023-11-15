@@ -2,7 +2,7 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require("../../middleware/auth/loginAuth");
 const validate = require("../../module/validation");
-const { CLUB, POST, NOTICE, POSITION } = require("../../module/global");
+const { CLUB, POST, NOTICE, POSITION, MAX_PK_LENGTH } = require("../../module/global");
 const { BadRequestException } = require("../../module/customError");
 
 // 동아리 공지 게시물 불러오는 api
@@ -15,7 +15,7 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(clubId, "clubId").checkInput().isNumber();
+        validate(clubId, "clubId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, 'page').isNumber().isPositive();
 
         const offset = (page - 1) * POST.MAX_POST_COUNT_PER_PAGE;
@@ -73,7 +73,7 @@ router.get("/fixed/club/:clubId", loginAuth, async (req, res, next) => {
     const { clubId } = req.params;
 
     try {
-        validate(clubId, "clubId").checkInput().isNumber();
+        validate(clubId, "clubId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         const selectedFixedNoticeSql = `SELECT
                                             notice_post_tb.id,
@@ -116,7 +116,7 @@ router.get("/:noticeId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(noticeId, "noticeId").checkInput().isNumber();
+        validate(noticeId, "noticeId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         // 게시물 조회
         const selectNoticeSql = `SELECT
                                         account_tb.id AS "authorId",
@@ -184,7 +184,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(clubId, "clubId").checkInput().isNumber()
+        validate(clubId, "clubId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
         validate(title, "title").checkInput().checkLength(1, NOTICE.MAX_TITLE_LENGTH)
         validate(content, "content").checkInput().checkLength(1, NOTICE.MAX_CONTENT_LENGTH)
         validate(isFixed, "isFixed").checkInput().isBoolean()
@@ -248,7 +248,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(noticeId, "noticeId").checkInput().isNumber()
+        validate(noticeId, "noticeId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
         validate(title, "title").checkInput().checkLength(1, NOTICE.MAX_TITLE_LENGTH)
         validate(content, "content").checkInput().checkLength(1, NOTICE.MAX_CONTENT_LENGTH)
         validate(isFixed, "isFixed").checkInput().isBoolean()
@@ -317,7 +317,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(noticeId, "noticeId").checkInput().isNumber()
+        validate(noticeId, "noticeId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
 
         pgClient = await pool.connect()
         await pgClient.query("BEGIN")

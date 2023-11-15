@@ -3,7 +3,7 @@ const pool = require("../../../config/database/postgresql")
 const loginAuth = require("../../middleware/auth/loginAuth")
 const createNotification = require("../../module/createNotification")
 const validate = require("../../module/validation")
-const { NOTICE_COMMENT, POSITION } = require("../../module/global")
+const { NOTICE_COMMENT, POSITION, MAX_PK_LENGTH } = require("../../module/global")
 const { BadRequestException } = require("../../module/customError")
 
 // 공지 게시물 댓글 작성
@@ -18,7 +18,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(noticeId, "noticeId").checkInput().isNumber()
+        validate(noticeId, "noticeId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
         validate(content, "content").checkInput().checkLength(1,NOTICE_COMMENT.MAX_COMMENT_CONTENT_LENGTH)
 
         pgClient = await pool.connect()
@@ -72,7 +72,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber()
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
         validate(content, "content").checkInput().checkLength(1,NOTICE_COMMENT.MAX_COMMENT_CONTENT_LENGTH)
 
         pgClient = await pool.connect()
@@ -139,7 +139,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber()
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
 
         pgClient = await pool.connect()
         await pgClient.query("BEGIN")
@@ -203,7 +203,7 @@ router.get("/:noticeId/list", loginAuth, async (req, res, next) => {
     let pgClient = null
 
     try {
-        validate(noticeId,"noticeId").checkInput().isNumber()
+        validate(noticeId,"noticeId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber()
         validate(page,"page").checkInput().isNumber()
 
         pgClient = await pool.connect()

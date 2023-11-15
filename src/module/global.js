@@ -1,4 +1,5 @@
 module.exports = {
+    MAX_PK_LENGTH: 4,
     ACCOUNT: {
         MAX_EMAIL_LENGTH: 60,
         MAX_PW_LENGTH: 60

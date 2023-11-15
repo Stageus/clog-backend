@@ -3,7 +3,7 @@ const pool = require("../../../config/database/postgresql");
 const loginAuth = require('../../middleware/auth/loginAuth');
 const validate = require('../../module/validation');
 const CONSTRAINT = require("../../module/constraint");
-const { CLUB, POST, POSITION } = require('../../module/global');
+const { CLUB, POST, MAX_PK_LENGTH } = require('../../module/global');
 const { BadRequestException, NotFoundException, ForbbidenException } = require('../../module/customError');
 
 // 동아리 내 모든 일반 게시물을 가져오는 api
@@ -18,7 +18,7 @@ router.get("/list/club/:clubId", loginAuth, async (req, res, next) => {
     const page = Number(req.query.page || 1);
 
     try {
-        validate(clubId, "clubId").checkInput().isNumber();
+        validate(clubId, "clubId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, "page").isNumber().isPositive();
 
         // 권한 체크
@@ -119,7 +119,7 @@ router.get("/list/board/:boardId", loginAuth, async (req, res, next) => {
     if (page < 1) page = 1;
 
     try {
-        validate(boardId, "boardId").checkInput().isNumber();
+        validate(boardId, "boardId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         const offset = (page - 1) * POST.MAX_POST_COUNT_PER_PAGE;
         // 권한 체크
         const selectAuthSql = `SELECT
@@ -190,7 +190,7 @@ router.get("/:postId", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(postId, "postId").checkInput().isNumber();
+        validate(postId, "postId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
 
         // 권한 체크
         const selectAuthSql = `SELECT
@@ -302,7 +302,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     let pgClient = null;
 
     try {
-        validate(boardId, "boardId").checkInput().isNumber();
+        validate(boardId, "boardId").checkInput().isNumber().checkLength(1, MAX_PK_LENGTH);
         validate(title, "title").checkInput().checkLength(1, POST.MAX_POST_TITLE_LENGTH);
         validate(content, "content").checkInput().checkLength(1, POST.MAX_POST_CONTENT_LENGTH);
 
@@ -392,7 +392,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     let pgClient = null;
 
     try {
-        validate(postId, "postId").checkInput().isNumber();
+        validate(postId, "postId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(title, "title").checkInput().checkLength(1, POST.MAX_POST_TITLE_LENGTH);
         validate(content, "content").checkInput().checkLength(1, POST.MAX_POST_CONTENT_LENGTH);
 
@@ -490,6 +490,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     };
 
     try {
+        validate(postId, "post-id").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         // 본인이 쓴 글이거나 position 0 or 1
         const selectAuthSql = `SELECT 
                                     account_id AS "accountId", 

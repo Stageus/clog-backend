@@ -37,8 +37,8 @@ router.post("/login", async (req, res, next) => {
         }
         const accessToken = jwtUtil.userSign(userData);
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
-            secure: false,
+            secure: true,
+            sameSite: 'none',
         });
         result.data = {
             userId: userData.id
@@ -101,7 +101,7 @@ router.post("/send-code", async (req, res, next) => {
     }
 
     try {
-        // validate(email, "email").checkInput().checkEmailRegex();
+        validate(email, "email").checkInput().checkEmailRegex();
         await emailHandler.sendVerifyEmail(email);
     } catch (error) {
         return next(error);

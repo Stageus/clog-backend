@@ -2,7 +2,7 @@ const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
 const loginAuth = require("../../middleware/auth/loginAuth");
 const validate = require("../../module/validation");
-const { PROMOTION_COMMENT, POSITION } = require("../../module/global");
+const { PROMOTION_COMMENT, MAX_PK_LENGTH } = require("../../module/global");
 const { BadRequestException } = require('../../module/customError');
 const CONSTRAINT = require("../../module/constraint");
 
@@ -19,7 +19,7 @@ router.get("/:promotionId/list", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(promotionId, "promotionId").checkInput().isNumber();
+        validate(promotionId, "promotionId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(page, "page").isNumber().isPositive();
 
         const selectCommentCountSql = `SELECT
@@ -123,7 +123,7 @@ router.post("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(promotionId, "promotionId").checkInput().isNumber();
+        validate(promotionId, "promotionId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, PROMOTION_COMMENT.MAX_COMMENT_CONTENT_LENGTH);
 
         const insertCommentSql = `INSERT INTO
@@ -161,7 +161,7 @@ router.put("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         validate(content, "content").checkInput().checkLength(1, PROMOTION_COMMENT.MAX_COMMENT_CONTENT_LENGTH)
 
         // 권한 체크
@@ -224,7 +224,7 @@ router.delete("/", loginAuth, async (req, res, next) => {
     };
 
     try {
-        validate(commentId, "commentId").checkInput().isNumber();
+        validate(commentId, "commentId").checkInput().checkLength(1, MAX_PK_LENGTH).isNumber();
         // 권한 체크
         const selectAuthSql = `SELECT
                                     COALESCE(
