@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
-const loginAuth = require('../../middleware/auth/loginAuth');
-const validate = require('../../module/validation');
-const { REPLY, MAX_PK_LENGTH } = require("../../module/global");
-const { BadRequestException } = require('../../module/customError');
-const CONSTRAINT = require("../../module/constraint");
+const loginAuth = require('../../../middleware/loginAuth');
+const validate = require('../../../module/validation');
+const { REPLY, MAX_PK_LENGTH } = require("../../../module/global");
+const { BadRequestException, NotFoundException, ForbbidenException } = require('../../../module/customError');
+const CONSTRAINT = require("../../../module/constraint");
 
 // 댓글의 답글 리스트 조회
 // 권한: 로그인한 유저
@@ -57,13 +57,13 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
                                 ON
                                     notice_reply_tb.comment_id = notice_comment_tb.id
                                 JOIN
-                                    notice_post_tb
+                                    notice_tb
                                 ON
-                                    notice_comment_tb.post_id = notice_post_tb.id
+                                    notice_comment_tb.post_id = notice_tb.id
                                 JOIN
                                     club_tb
                                 ON
-                                    notice_post_tb.club_id = club_tb.id
+                                    notice_tb.club_id = club_tb.id
                                 WHERE
                                     notice_reply_tb.comment_id = $2
                                 ORDER BY
@@ -113,22 +113,24 @@ router.post("/", loginAuth, async (req, res, next) => {
                                 FROM
                                     notice_comment_tb
                                 JOIN
-                                    notice_post_tb
+                                    notice_tb
                                 ON
-                                    notice_comment_tb.post_id = notice_post_tb.id
+                                    notice_comment_tb.post_id = notice_tb.id
                                 JOIN
                                     club_tb
                                 ON
-                                    notice_post_tb.club_id = club_tb.id
+                                    notice_tb.club_id = club_tb.id
                                 WHERE
                                     notice_comment_tb.id = $2`;
+
         const selectAuthParam = [userId, commentId];
         const selectAuthData = await pool.query(selectAuthSql, selectAuthParam);
+        console.log(selectAuthData);
         if (selectAuthData.rowCount === 0) {
-            throw new BadRequestException("해당하는 댓글이 없습니다");
+            throw new NotFoundException("해당하는 댓글이 없습니다");
         }
         if (!selectAuthData.rows[0].manageAuth) {
-            throw new BadRequestException("해당하는 동아리에 가입되어있지 않습니다");
+            throw new ForbbidenException("해당하는 동아리에 가입되어있지 않습니다");
         }
         // 작성 시작
         const insertPostSql = `INSERT INTO
@@ -189,22 +191,23 @@ router.put("/", loginAuth, async (req, res, next) => {
                                 ON
                                     notice_reply_tb.comment_id = notice_comment_tb.id
                                 JOIN
-                                    notice_post_tb
+                                    notice_tb
                                 ON
-                                    notice_comment_tb.post_id = notice_post_tb.id
+                                    notice_comment_tb.post_id = notice_tb.id
                                 JOIN
                                     club_tb
                                 ON
-                                    notice_post_tb.club_id = club_tb.id
+                                    notice_tb.club_id = club_tb.id
                                 WHERE
                                     notice_reply_tb.id = $2`;
         const selectAuthParam = [userId, replyId];
         const selectAuthData = await pool.query(selectAuthSql, selectAuthParam);
+        console.log(selectAuthData);
         if (selectAuthData.rowCount === 0) {
-            throw new BadRequestException("해당하는 답글이 없습니다");
+            throw new NotFoundException("해당하는 답글이 없습니다");
         }
         if (!selectAuthData.rows[0].manageState) {
-            throw new BadRequestException("수정 권한이 없습니다");
+            throw new ForbbidenException("수정 권한이 없습니다");
         }
         // 수정 시작
         const updatePostSql = `UPDATE
@@ -258,13 +261,13 @@ router.delete("/", loginAuth, async (req, res, next) => {
                                 ON
                                     notice_reply_tb.comment_id = notice_comment_tb.id
                                 JOIN
-                                    notice_post_tb
+                                    notice_tb
                                 ON
-                                    notice_comment_tb.post_id = notice_post_tb.id
+                                    notice_comment_tb.post_id = notice_tb.id
                                 JOIN
                                     club_tb
                                 ON
-                                    notice_post_tb.club_id = club_tb.id
+                                    notice_tb.club_id = club_tb.id
                                 WHERE
                                     notice_reply_tb.id = $2`;
         const selectAuthParam = [userId, replyId];

@@ -1,10 +1,10 @@
 const router = require("express").Router();
-const loginAuth = require('../../middleware/auth/loginAuth');
-const { REPLY, MAX_PK_LENGTH } = require('../../module/global');
-const validate = require('../../module/validation');
+const loginAuth = require('../../../middleware/loginAuth');
+const { REPLY, MAX_PK_LENGTH } = require('../../../module/global');
+const validate = require('../../../module/validation');
 const pool = require("../../../config/database/postgresql");
-const CONSTRAINT = require("../../module/constraint");
-const { BadRequestException } = require('../../module/customError');
+const CONSTRAINT = require("../../../module/constraint");
+const { BadRequestException } = require('../../../module/customError');
 
 
 // 홍보 게시물 댓글의 답글 리스트 조회

@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const pool = require('../../config/database/postgresql');
-const loginAuth = require('../middleware/auth/loginAuth');
+const pool = require('../config/database/postgresql');
+const loginAuth = require('../middleware/loginAuth');
 const validate = require('../module/validation');
 const { SEARCH } = require("../module/global");
 const { BadRequestException } = require('../module/customError');

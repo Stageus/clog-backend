@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const pool = require('../../config/database/postgresql');
-const loginAuth = require('../middleware/auth/loginAuth');
+const pool = require('../config/database/postgresql');
+const loginAuth = require('../middleware/loginAuth');
 const validate = require('../module/validation');
 const { CLUB, BOARD, MAX_PK_LENGTH } = require("../module/global");
 const { BadRequestException, NotFoundException, ForbbidenException } = require('../module/customError');

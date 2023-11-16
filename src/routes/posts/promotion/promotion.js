@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
-const loginAuth = require('../../middleware/auth/loginAuth');
-const validate = require('../../module/validation');
-const { PROMOTION, IMAGE, SEARCH, MAX_PK_LENGTH } = require("../../module/global");
-const { BadRequestException, NotFoundException, ForbbidenException } = require("../../module/customError");
-const CONSTRAINT = require("../../module/constraint");
+const loginAuth = require('../../../middleware/loginAuth');
+const validate = require('../../../module/validation');
+const { PROMOTION, IMAGE, SEARCH, MAX_PK_LENGTH } = require("../../../module/global");
+const { BadRequestException, NotFoundException, ForbbidenException } = require("../../../module/customError");
+const CONSTRAINT = require("../../../module/constraint");
 
 // 홍보물 검색 api
 // filter: title OR club-name 택 1

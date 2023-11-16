@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
-const loginAuth = require('../../middleware/auth/loginAuth');
-const validate = require('../../module/validation');
-const CONSTRAINT = require("../../module/constraint");
-const { CLUB, POST, MAX_PK_LENGTH } = require('../../module/global');
-const { BadRequestException, NotFoundException, ForbbidenException } = require('../../module/customError');
+const loginAuth = require('../../../middleware/loginAuth');
+const validate = require('../../../module/validation');
+const CONSTRAINT = require("../../../module/constraint");
+const { CLUB, POST, MAX_PK_LENGTH } = require('../../../module/global');
+const { BadRequestException, NotFoundException, ForbbidenException } = require('../../../module/customError');
 
 // 동아리 내 모든 일반 게시물을 가져오는 api
 // 권한: 해당 동아리에 가입되어있어야 함

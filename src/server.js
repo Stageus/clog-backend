@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
-const redisClient = require("../config/database/redis");
+const redisClient = require("./config/database/redis");
 const cors = require("cors");
 
 // 로그
@@ -17,9 +17,9 @@ const uploadApi = require("./routes/upload");
 const clubApi = require("./routes/club");
 const notificationApi = require("./routes/notification");
 const boardApi = require("./routes/board");
-const generalApi = require("./routes/general");
-const promotionApi = require("./routes/promotion");
-const noticeApi = require("./routes/notice");
+const generalApi = require("./routes/posts/general");
+const promotionApi = require("./routes/posts/promotion");
+const noticeApi = require("./routes/posts/notice");
 const searchApi = require("./routes/search");
 
 const errorHandling = require("./middleware/errorHandling");

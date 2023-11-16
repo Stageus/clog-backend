@@ -4,7 +4,7 @@ const client = require("mongodb").MongoClient
 const validate = require("../module/validation")
 const { NOTIFICATION } = require("../module/global")
 const { BadRequestException } = require("../module/customError")
-const loginAuth = require("../middleware/auth/loginAuth");
+const loginAuth = require("../middleware/loginAuth");
 const notificationSentence = require("../module/notificationSentence")
 const { ObjectId } = require("mongodb")
 

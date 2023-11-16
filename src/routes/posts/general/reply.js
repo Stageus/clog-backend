@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require('../../../config/database/postgresql');
-const loginAuth = require('../../middleware/auth/loginAuth');
-const { BadRequestException, NotFoundException } = require('../../module/customError');
-const { REPLY, MAX_PK_LENGTH } = require('../../module/global');
-const CONSTRAINT = require("../../module/constraint");
-const validate = require('../../module/validation');
+const loginAuth = require('../../../middleware/loginAuth');
+const { BadRequestException, NotFoundException } = require('../../../module/customError');
+const { REPLY, MAX_PK_LENGTH } = require('../../../module/global');
+const CONSTRAINT = require("../../../module/constraint");
+const validate = require('../../../module/validation');
 
 // 댓글의 답글 리스트를 조회
 // 권한: 해당 동아리에 가입되어있어야 함

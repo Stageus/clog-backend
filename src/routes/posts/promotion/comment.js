@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
-const loginAuth = require("../../middleware/auth/loginAuth");
-const validate = require("../../module/validation");
-const { PROMOTION_COMMENT, MAX_PK_LENGTH } = require("../../module/global");
-const { BadRequestException } = require('../../module/customError');
-const CONSTRAINT = require("../../module/constraint");
+const loginAuth = require("../../../middleware/loginAuth");
+const validate = require("../../../module/validation");
+const { PROMOTION_COMMENT, MAX_PK_LENGTH } = require("../../../module/global");
+const { BadRequestException } = require('../../../module/customError');
+const CONSTRAINT = require("../../../module/constraint");
 
 // 홍보 게시글의 댓글 리스트를 조회
 // 권한: 로그인한 유저라면 전부 다

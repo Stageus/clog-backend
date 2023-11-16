@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { secretKey, accessTokenOption } = require("../../config/jwtSetting");
+const { secretKey, accessTokenOption } = require("../config/jwtSetting");
 
 const userSign = (user) => {
     const payload = {

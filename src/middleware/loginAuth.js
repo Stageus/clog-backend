@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const jwt = require("jsonwebtoken");
-const { UnauthorizedException } = require("../../module/customError");
+const { UnauthorizedException } = require("../module/customError");
 
 module.exports = (req, res, next) => {
     // 쿠키에 담긴 accessToken을 추출

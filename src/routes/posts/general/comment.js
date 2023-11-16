@@ -1,10 +1,10 @@
 const router = require("express").Router();
 const pool = require("../../../config/database/postgresql");
-const loginAuth = require('../../middleware/auth/loginAuth');
-const validate = require('../../module/validation');
-const { COMMENT, MAX_PK_LENGTH } = require('../../module/global');
-const CONSTRAINT = require("../../module/constraint");
-const { BadRequestException, NotFoundException, ForbbidenException } = require('../../module/customError');
+const loginAuth = require('../../../middleware/loginAuth');
+const validate = require('../../../module/validation');
+const { COMMENT, MAX_PK_LENGTH } = require('../../../module/global');
+const CONSTRAINT = require("../../../module/constraint");
+const { BadRequestException, NotFoundException, ForbbidenException } = require('../../../module/customError');
 
 // 게시글의 댓글 리스트 조회 api
 // 권한: 해당 동아리에 가입되어있어야 함.

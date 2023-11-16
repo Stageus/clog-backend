@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const loginAuth = require("../middleware/auth/loginAuth");
+const loginAuth = require("../middleware/loginAuth");
 const imageUploader = require("../middleware/imageUploader");
 const { BadRequestException } = require('../module/customError');
 

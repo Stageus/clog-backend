@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const pool = require("../../config/database/postgresql");
-const redisClient = require("../../config/database/redis");
+const pool = require("../config/database/postgresql");
+const redisClient = require("../config/database/redis");
 const validate = require("../module/validation");
 const bcryptUtil = require("../module/bcrypt");
 const jwtUtil = require("../module/jwt");
@@ -151,7 +151,7 @@ router.post("/reset-pw/verify-email", async (req, res, next) => {
 
     try {
         // validate(email, "email").checkInput().checkEmailRegex();
-        validate(code, "code").checkInput().isNumber().checkLength(certifiedNumberLength, certifiedNumberLength);
+        validate(code, "code").checkInput().isNumber().checkLength(1, AUTH.CERTIFIED_LENGTH);
 
         const savedVerifyCode = await redisClient.get(email);
         // redis에 이메일이 존재하지 않는 경우

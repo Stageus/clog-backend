@@ -74,10 +74,13 @@ module.exports = {
     NOTIFICATION_URL: {
         CLUB_COMMENT: "/comment",
         CLUB_REPLY: "/reply",
+
         NOTI_COMMENT: "/notice/comment",
         NOTI_REPLY: "/notice/reply",
+
         PR_COMMENT: "/promotion/comment",
         PR_REPLY: "/promotion/reply",
+        
         GRADE_UPDATE: "/club/position",
         JOIN_ACCEPT: "/club/member"
     },
