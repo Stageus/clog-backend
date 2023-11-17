@@ -16,18 +16,8 @@
     	- 동아리원 관리(퇴출, 직책 부여, 가입신청 승인 및 거절, 가입신청 가능 여부 변경)
       	- 동아리 프로필 관리(동아리 소개글, 테마, 프로필로고, 베너 수정 가능)
       	- 동아리방 관리(게시판 목록 수정, 공지사항 게시)
-### 인원
-	프론트 2,
-	백엔드 2
 
-### 기간
-	- 기획, 디자인 : 23.08.23 ~ 23.09.01 (약 1주)
-	- api 명세 및 erd 설계 : 23.09.01 ~ 23.09.17 (약 2주)
-	- 개발 : 23.09.26 ~ 23.10.23 (약 4주)
-
-### 총 개발 기간 === 약 2달
-
-### 나의 역할
+### 역할
 	- 프로젝트 매니저(pm) + 백엔드 개발
 	- 주 2회 회의를 통해 전체적인 프로젝트의 요구사항을 수립하고 정제
 	- erd 설계(vsc erd editor 이용)
@@ -41,6 +31,20 @@
 		- 응답 코드 통일화
 		- request, response 형식 통일
 ---
+
+## 폴더 구조
+```shell
+src/
+├── config				# 프로젝트 설정 파일 (DB, JWT, AWS ...)
+│   └── database
+├── middleware			# 미들웨어 (auth, errorHandling ...)
+├── module				# 유틸성 함수, 모듈
+└── routes				# 라우팅
+    └── posts
+        ├── general
+        ├── notice
+        └── promotion
+```
 
 ## 사용 기술
 ### Language
@@ -62,17 +66,3 @@
 
 ### Communication
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white)
-
-## 폴더 구조
-```shell
-src/
-├── config
-│   └── database
-├── middleware
-├── module
-└── routes
-    └── posts
-        ├── general
-        ├── notice
-        └── promotion
-```
