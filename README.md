@@ -35,11 +35,11 @@
 ## 폴더 구조
 ```shell
 src/
-├── config				# 프로젝트 설정 파일 (DB, JWT, AWS ...)
+├── config			# 프로젝트 설정 파일 (DB, JWT, AWS ...)
 │   └── database
 ├── middleware			# 미들웨어 (auth, errorHandling ...)
-├── module				# 유틸성 함수, 모듈
-└── routes				# 라우팅
+├── module			# 유틸성 함수, 모듈
+└── routes			# 라우팅
     └── posts
         ├── general
         ├── notice
