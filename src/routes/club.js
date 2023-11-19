@@ -564,8 +564,10 @@ router.get("/member/:clubId/profile", loginAuth, async (req, res, next) => {
 });
 
 // 동아리 내 멤버 리스트 api
+// 권한: 해당 동아리에 가입되어있어야 함
 router.get("/member/:clubId/list", loginAuth, async (req, res, next) => {
     const { clubId } = req.params;
+    const userId = req.decoded.id;
     const result = {
         message: "",
         data: {}
@@ -573,6 +575,21 @@ router.get("/member/:clubId/list", loginAuth, async (req, res, next) => {
 
     try {
         validate(clubId, "club-id").checkInput().isNumber();
+
+        // 권한 체크
+        const selectClubAuthSql = `SELECT
+                                        position < 3 AS "clubAuth"
+                                    FROM
+                                        club_member_tb
+                                    WHERE
+                                        club_id = $1
+                                    AND
+                                        account_id = $2`;
+        const selectClubAuthParam = [clubId, userId];
+        const selectClubAuthData = await pool.query(selectClubAuthSql, selectClubAuthParam);
+        if (!selectClubAuthData.rows[0]?.clubAuth) {
+            throw new ForbbidenException("동아리에 가입되어있지 않습니다");
+        }
 
         const selectMemberListSql = `SELECT 
                                             club_member_tb.id AS "id",
