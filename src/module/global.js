@@ -19,7 +19,8 @@ module.exports = {
         MAX_PROFILE_IMAGE_LENGTH: 20000,
         MAX_ALL_POST_COUNT_PER_PAGE: 20,
         MAX_FIXED_NOTICE_COUNT_PER_PAGE: 5,
-        MAX_BOARD_COUNT: 10
+        MAX_BOARD_COUNT: 10,
+        MAX_CLUB_MANAGER_COUNT: 6
     },
 
     BOARD: {
