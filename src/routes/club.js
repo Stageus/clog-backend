@@ -712,6 +712,78 @@ router.get("/manager/:clubId/list", loginAuth, async (req, res, next) => {
 // 동아리 내 부원을 불러오는 api
 // 권한: 해당 동아리에 가입되어있어야 함
 router.get("/member/:clubId/list", loginAuth, async (req, res, next) => {
+    const { clubId } = req.params;
+    const userId = req.decoded.id;
+    const page = req.query.page || 1;
+    const result = {
+        message: "",
+        data: {}
+    };
+
+    try {
+        validate(clubId, "club-id").checkInput().checkLength(1, MAX_PK_LENGTH);
+        validate(page, "page").isNumber().isPositive();
+        const offset = (page - 1) * CLUB.MAX_CLUB_MEMBER_COUNT;
+
+        // 권한 체크
+        const selectClubAuthSql = `SELECT
+                                        position < 3 AS "clubAuth"
+                                    FROM
+                                        club_member_tb
+                                    WHERE
+                                        club_id = $1
+                                    AND
+                                        account_id = $2`;
+        const selectClubAuthParam = [clubId, userId];
+        const selectClubAuthData = await pool.query(selectClubAuthSql, selectClubAuthParam);
+        if (!selectClubAuthData.rows[0]?.clubAuth) {
+            throw new ForbbidenException("동아리에 가입되어있지 않습니다");
+        }
+
+        // 동아리 부원들을 가져옴
+        const selectClubMemberSql = `SELECT 
+                                            club_member_tb.id AS "id",
+                                            club_member_tb.account_id AS "userId",
+                                            position_tb.name AS "position", 
+                                            major_tb.name AS "major", 
+                                            account_tb.entry_year AS "entryYear", 
+                                            account_tb.name AS "userName", 
+                                            account_tb.personal_color AS "personalColor", 
+                                            to_char(club_member_tb.created_at, 'yyyy.mm.dd') AS "createdAt" 
+                                        FROM 
+                                            club_member_tb 
+                                        JOIN 
+                                            account_tb 
+                                        ON 
+                                            club_member_tb.account_id = account_tb.id 
+                                        JOIN 
+                                            major_tb 
+                                        ON 
+                                            account_tb.major = major_tb.id 
+                                        JOIN 
+                                            position_tb 
+                                        ON 
+                                            club_member_tb.position = position_tb.id 
+                                        WHERE 
+                                            club_member_tb.club_id = $1
+                                        AND
+                                            club_member_tb.position = $2
+                                        ORDER BY
+                                            club_member_tb.created_at DESC
+                                        OFFSET
+                                            $3
+                                        LIMIT
+                                            $4`;
+        const selectClubMemberParams = [clubId, POSITION.MANAGER, offset, CLUB.MAX_CLUB_MEMBER_COUNT];
+        const selectClubMemberData = await pool.query(selectClubMemberSql, selectClubMemberParams);
+        result.data = {
+            manager: selectClubMemberData.rows
+        };
+
+    } catch (error) {
+        return next(error);
+    }
+    res.send(result);
 });
 
 // 직급 변경시켜주는 api

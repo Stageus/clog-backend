@@ -33,7 +33,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
                                     COALESCE(
                                         (
                                             SELECT
-                                                club_member_tb.position < 2 OR notice_reply_tb.account_id = $1
+                                                club_member_tb.position < 2 OR club_member_tb.account_id = account_tb.id
                                             FROM
                                                 club_member_tb
                                             WHERE

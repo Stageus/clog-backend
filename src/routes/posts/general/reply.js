@@ -60,7 +60,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
         const selectReplySql = `SELECT
                                     club_reply_tb.id,
                                     club_reply_tb.content,
-                                    club_reply_tb.created_at AS "createdAt",
+                                    TO_CHAR(club_reply_tb.created_at, 'yyyy.mm.dd') AS "createdAt",
                                     account_tb.id AS "accountId",
                                     account_tb.entry_year AS "entryYear",
                                     account_tb.name AS "authorName",
@@ -93,7 +93,7 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
                                             club_member_tb.club_id = club_tb.id
                                     ) AS "authorMajor",
                                     account_tb.personal_color AS "authorPcolor",
-                                    account_tb.id = $1 AS "authorState"
+                                    account_tb.id = $1 OR club_member_tb.position < 2 AS "manageState"
                                 FROM
                                     club_reply_tb
                                 JOIN
@@ -116,6 +116,10 @@ router.get("/list/comment/:commentId", loginAuth, async (req, res, next) => {
                                     club_tb
                                 ON
                                     club_board_tb.club_id = club_tb.id
+                                JOIN
+                                    club_member_tb
+                                ON
+                                    $1 = club_member_tb.account_id AND club_tb.id = club_member_tb.club_id
                                 WHERE
                                     club_reply_tb.club_comment_id = $2
                                 ORDER BY
